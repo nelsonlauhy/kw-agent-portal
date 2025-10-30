@@ -55,15 +55,48 @@
   </main>
 
   <script>
-    // Basic client-side validation; Firebase wiring will be added next step
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
+    import { firebaseConfig } from '/assets/firebaseConfig.js';
+
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+
     const form = document.getElementById('loginForm');
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!form.checkValidity()) {
-        form.classList.add('was-validated');
-        return;
-      }
-      alert('Coming soon: Firebase Email/Password sign-in');
+    const emailEl = document.getElementById('email');
+    const pwEl = document.getElementById('password');
+
+
+    form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.classList.add('was-validated'); return; }
+    try {
+    const cred = await signInWithEmailAndPassword(auth, emailEl.value.trim(), pwEl.value);
+    // Optional: enforce email verification in a later step
+    // if (!cred.user.emailVerified) { alert('Please verify your email first.'); return; }
+    // Redirect placeholder (later: /agent/dashboard.html)
+    window.location.href = '/index.html';
+    } catch (err) {
+    console.error(err);
+    alert(mapAuthError(err));
+    }
+    });
+
+
+    function mapAuthError(err){
+    const c = err?.code || '';
+    if (c.includes('invalid-credential') || c.includes('wrong-password')) return 'Invalid email or password.';
+    if (c.includes('user-not-found')) return 'No account found for this email.';
+    if (c.includes('too-many-requests')) return 'Too many attempts. Try again later.';
+    return 'Sign-in failed. Please try again.';
+    }
+
+
+    onAuthStateChanged(auth, (user) => {
+    // Optionally auto-redirect if already signed in
+    // if (user) window.location.href = '/index.html';
     });
   </script>
 </body>
