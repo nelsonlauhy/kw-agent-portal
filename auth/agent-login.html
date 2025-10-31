@@ -157,26 +157,25 @@
     });
 
     // ===== Email link (passwordless) =====
+    const ACTION_URL = 'https://kw-agent-portal.netlify.app/auth/agent-login.html'; // ← 固定你的正式域名
     const formLink   = document.getElementById('emailLinkForm');
     const emailLinkEl= document.getElementById('emailLink');
     const info       = document.getElementById('emailLinkInfo');
 
     formLink.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!formLink.checkValidity()) { formLink.classList.add('was-validated'); return; }
-      const email = emailLinkEl.value.trim();
-      const actionCodeSettings = {
-        url: `${window.location.origin}/auth/agent-login.html`,
-        handleCodeInApp: true,
-      };
-      try {
+    e.preventDefault();
+    if (!formLink.checkValidity()) { formLink.classList.add('was-validated'); return; }
+    const email = emailLinkEl.value.trim();
+    const actionCodeSettings = { url: ACTION_URL, handleCodeInApp: true };
+    try {
         await sendSignInLinkToEmail(auth, email, actionCodeSettings);
         localStorage.setItem('emailForSignIn', email);
         info.classList.remove('d-none');
         alert(`✅ A sign-in link has been sent to: ${email}\nOpen it on this device to finish signing in.`);
-      } catch (err) {
-        console.error(err); alert(mapAuthError(err));
-      }
+    } catch (err) {
+        console.error(err);
+        alert(mapAuthError(err));
+    }
     });
 
     // Complete email link sign-in when coming back from email
