@@ -10,6 +10,7 @@
     body { background: #f7f7fb; }
     .logo { height: 32px; border-radius: 8px; }
     .card { border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    .tab-pane { padding-top: 1rem; }
   </style>
 </head>
 <body>
@@ -22,32 +23,89 @@
     </div>
   </nav>
 
-  <main class="container" style="max-width:560px; padding:8vh 0;">
+  <main class="container" style="max-width:700px; padding:8vh 0;">
     <div class="card">
       <div class="card-body p-4">
         <h1 class="h4 mb-3">Agent Login</h1>
-        <p class="text-secondary">
-          Use your personal email and password. You can reset your password anytime.
-        </p>
+        <p class="text-secondary mb-4">Choose a method: classic password, one-time email link, or SMS code.</p>
 
-        <form id="loginForm" class="needs-validation" novalidate>
-          <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" required autocomplete="username" placeholder="you@example.com">
-            <div class="invalid-feedback">Please enter a valid email.</div>
+        <!-- Tabs -->
+        <ul class="nav nav-pills" id="loginTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pwd-tab" data-bs-toggle="pill" data-bs-target="#pwd-pane" type="button" role="tab" aria-controls="pwd-pane" aria-selected="true">Password</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="link-tab" data-bs-toggle="pill" data-bs-target="#link-pane" type="button" role="tab" aria-controls="link-pane" aria-selected="false">One-time email link</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="sms-tab" data-bs-toggle="pill" data-bs-target="#sms-pane" type="button" role="tab" aria-controls="sms-pane" aria-selected="false">SMS code</button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="loginTabsContent">
+          <!-- Password login -->
+          <div class="tab-pane fade show active" id="pwd-pane" role="tabpanel" aria-labelledby="pwd-tab" tabindex="0">
+            <form id="loginForm" class="needs-validation mt-3" novalidate>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" required autocomplete="username" placeholder="you@example.com">
+                <div class="invalid-feedback">Please enter a valid email.</div>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required autocomplete="current-password" placeholder="••••••••">
+                <div class="invalid-feedback">Password is required.</div>
+              </div>
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Sign in</button>
+                <a href="/auth/reset-password.html" class="btn btn-link">Forgot password?</a>
+              </div>
+            </form>
           </div>
 
-          <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" required autocomplete="current-password" placeholder="••••••••">
-            <div class="invalid-feedback">Password is required.</div>
+          <!-- Email link (passwordless) -->
+          <div class="tab-pane fade" id="link-pane" role="tabpanel" aria-labelledby="link-tab" tabindex="0">
+            <form id="emailLinkForm" class="needs-validation mt-3" novalidate>
+              <div class="mb-3">
+                <label for="emailLink" class="form-label">Email</label>
+                <input type="email" class="form-control" id="emailLink" required placeholder="you@example.com">
+                <div class="invalid-feedback">Please enter a valid email.</div>
+              </div>
+              <div class="alert alert-info d-none" id="emailLinkInfo">
+                We’ll send a one-time sign-in link to your email. Click it on this device to finish signing in.
+              </div>
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-outline-primary" id="sendLinkBtn">Send sign-in link</button>
+              </div>
+            </form>
           </div>
 
-          <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Sign in</button>
-            <a href="/auth/reset-password.html" class="btn btn-link">Forgot password?</a>
+          <!-- SMS OTP -->
+          <div class="tab-pane fade" id="sms-pane" role="tabpanel" aria-labelledby="sms-tab" tabindex="0">
+            <form id="smsForm" class="needs-validation mt-3" novalidate>
+              <div class="mb-3">
+                <label for="phone" class="form-label">Mobile number</label>
+                <input type="tel" class="form-control" id="phone" required placeholder="+1 416 555 1234">
+                <div class="form-text">Use international format (e.g., <code>+1 416 555 1234</code>).</div>
+                <div class="invalid-feedback">Please enter a valid phone number.</div>
+              </div>
+              <div class="d-grid gap-2">
+                <button type="button" class="btn btn-outline-primary" id="sendSmsBtn">Send SMS code</button>
+              </div>
+
+              <div class="mt-3 d-none" id="codeBlock">
+                <label for="smsCode" class="form-label">Enter 6-digit code</label>
+                <input type="text" inputmode="numeric" maxlength="6" class="form-control" id="smsCode" placeholder="123456">
+                <div class="d-grid gap-2 mt-2">
+                  <button type="button" class="btn btn-primary" id="verifySmsBtn">Verify & Sign in</button>
+                </div>
+              </div>
+
+              <!-- reCAPTCHA mount point (invisible) -->
+              <div id="recaptcha-container" class="mt-2"></div>
+            </form>
           </div>
-        </form>
+        </div>
 
         <hr class="my-4">
         <div class="d-flex justify-content-between">
@@ -58,50 +116,147 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    // Import Firebase modules
+    // Firebase imports
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      isSignInWithEmailLink,
+      sendSignInLinkToEmail,
+      signInWithEmailLink,
+      RecaptchaVerifier,
+      signInWithPhoneNumber
+    } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js';
     import { firebaseConfig } from '/assets/firebaseConfig.js';
 
-    // Initialize Firebase
+    // Init
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    auth.useDeviceLanguage();
 
-    // If already logged in, redirect to home
-    onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = '/agent/home.html';
-    });
+    // Auto redirect if already logged in
+    onAuthStateChanged(auth, (user) => { if (user) window.location.href = '/agent/home.html'; });
 
-    // Handle login form
-    const form = document.getElementById('loginForm');
+    // ===== Password login =====
+    const formPwd = document.getElementById('loginForm');
     const emailEl = document.getElementById('email');
-    const pwEl = document.getElementById('password');
+    const pwEl   = document.getElementById('password');
 
-    form.addEventListener('submit', async (e) => {
+    formPwd.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!form.checkValidity()) {
-        form.classList.add('was-validated');
-        return;
-      }
-
+      if (!formPwd.checkValidity()) { formPwd.classList.add('was-validated'); return; }
       try {
         await signInWithEmailAndPassword(auth, emailEl.value.trim(), pwEl.value);
         window.location.href = '/agent/home.html';
       } catch (err) {
-        console.error(err);
-        alert(mapAuthError(err));
+        console.error(err); alert(mapAuthError(err));
       }
     });
 
-    // Friendly error mapping
-    function mapAuthError(err) {
+    // ===== Email link (passwordless) =====
+    const formLink   = document.getElementById('emailLinkForm');
+    const emailLinkEl= document.getElementById('emailLink');
+    const info       = document.getElementById('emailLinkInfo');
+
+    formLink.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!formLink.checkValidity()) { formLink.classList.add('was-validated'); return; }
+      const email = emailLinkEl.value.trim();
+      const actionCodeSettings = {
+        url: `${window.location.origin}/auth/agent-login.html`,
+        handleCodeInApp: true,
+      };
+      try {
+        await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+        localStorage.setItem('emailForSignIn', email);
+        info.classList.remove('d-none');
+        alert(`✅ A sign-in link has been sent to: ${email}\nOpen it on this device to finish signing in.`);
+      } catch (err) {
+        console.error(err); alert(mapAuthError(err));
+      }
+    });
+
+    // Complete email link sign-in when coming back from email
+    (async function completeEmailLinkIfNeeded(){
+      try {
+        if (!isSignInWithEmailLink(auth, window.location.href)) return;
+        let email = localStorage.getItem('emailForSignIn');
+        if (!email) email = window.prompt('Please confirm your email for sign-in');
+        if (!email) return;
+        await signInWithEmailLink(auth, email, window.location.href);
+        localStorage.removeItem('emailForSignIn');
+        window.location.href = '/agent/home.html';
+      } catch (err) {
+        console.error(err); alert(mapAuthError(err));
+      }
+    })();
+
+    // ===== SMS OTP =====
+    const phoneEl       = document.getElementById('phone');
+    const sendSmsBtn    = document.getElementById('sendSmsBtn');
+    const verifySmsBtn  = document.getElementById('verifySmsBtn');
+    const codeBlock     = document.getElementById('codeBlock');
+    let confirmationResult = null;
+
+    // Invisible reCAPTCHA
+    let recaptchaVerifier = null;
+    function ensureRecaptcha() {
+      if (recaptchaVerifier) return recaptchaVerifier;
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {}
+      });
+      return recaptchaVerifier;
+    }
+
+    sendSmsBtn.addEventListener('click', async () => {
+      try {
+        const raw = phoneEl.value.trim();
+        if (!raw) { alert('Please enter your mobile number in +1 416 555 1234 format.'); return; }
+        const phone = normalizeE164(raw);
+        confirmationResult = await signInWithPhoneNumber(auth, phone, ensureRecaptcha());
+        codeBlock.classList.remove('d-none');
+        document.getElementById('smsCode').focus();
+        alert('✅ SMS code sent. Please check your phone.');
+      } catch (err) {
+        console.error(err); alert(mapAuthError(err));
+      }
+    });
+
+    verifySmsBtn.addEventListener('click', async () => {
+      try {
+        const code = (document.getElementById('smsCode').value || '').trim();
+        if (code.length !== 6) { alert('Please enter the 6-digit code.'); return; }
+        if (!confirmationResult) { alert('Please request a code first.'); return; }
+        await confirmationResult.confirm(code);
+        window.location.href = '/agent/home.html';
+      } catch (err) {
+        console.error(err); alert(mapAuthError(err));
+      }
+    });
+
+    function normalizeE164(input){
+      const cleaned = input.replace(/[^+\d]/g, '');
+      return cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+    }
+
+    // Error mapper
+    function mapAuthError(err){
       const c = err?.code || '';
       if (c.includes('invalid-credential') || c.includes('wrong-password')) return 'Invalid email or password.';
       if (c.includes('user-not-found')) return 'No account found for this email.';
+      if (c.includes('invalid-email')) return 'Invalid email format.';
       if (c.includes('too-many-requests')) return 'Too many attempts. Try again later.';
       if (c.includes('network-request-failed')) return 'Network error. Check your connection.';
-      return 'Sign-in failed. Please try again.';
+      if (c.includes('missing-phone-number') || c.includes('invalid-phone-number')) return 'Please enter a valid phone number.';
+      if (c.includes('captcha-check-failed')) return 'reCAPTCHA check failed. Please try again.';
+      if (c.includes('operation-not-allowed')) return 'This sign-in method is not enabled. Please contact support.';
+      if (c.includes('code-expired')) return 'Code expired. Request a new SMS code.';
+      if (c.includes('invalid-verification-code')) return 'Invalid code. Please re-enter the 6-digit code.';
+      return `Sign-in failed. (${c || 'unknown error'})`;
     }
   </script>
 </body>

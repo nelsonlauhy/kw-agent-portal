@@ -63,8 +63,8 @@
               Use your personal email + password. You can reset your password anytime.
             </p>
             <div class="d-grid gap-2">
-              <a id="btn-agent-login" class="btn btn-primary btn-xl" href="/auth/agent-login.html">Agent Login</a>
-              <a id="btn-agent-register" class="btn btn-outline-primary" href="/register/new-agent.html">New Agent Registration</a>
+              <a class="btn btn-primary btn-xl" href="/auth/agent-login.html">Agent Login</a>
+              <a class="btn btn-outline-primary" href="/register/new-agent.html">New Agent Registration</a>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@
   <script>
     document.getElementById('btn-internal').addEventListener('click', (e) => {
       e.preventDefault();
-      // Placeholder for future Microsoft SSO integration
+      // TODO: replace with Microsoft SSO route when ready
       alert('Coming soon: Microsoft SSO');
     });
   </script>
