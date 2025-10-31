@@ -1,0 +1,9 @@
+# Allow direct access to all static files and folders first
+/auth/* /auth/:splat 200
+/agent/* /agent/:splat 200
+/register/* /register/:splat 200
+/assets/* /assets/:splat 200
+
+
+# Fallback: send unknown routes to index.html (for SPA routing later)
+/* /index.html 200
